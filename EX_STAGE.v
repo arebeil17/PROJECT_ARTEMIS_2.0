@@ -100,7 +100,7 @@ module EX_STAGE(
         .Out(Result), 
         .In0(ALUResult), 
         .In1(SADResult), 
-        .Sel(L16B[1]));
+        .Sel(L16B[0]));
     
     assign RegWrite_Out = RegWrite_In & ALURegWrite;
     

@@ -167,25 +167,7 @@ module DataMemory(Address, WriteData, ByteSel, L16B, Clock, MemWrite, MemRead, R
 //                       memory[(Address[31:2] + 258)][7:0], memory[(Address[31:2] + 259)][7:0]};
               ReadData2 = {temp1, temp2};  
               //ReadData2_2 = {temp3, temp4};                 
-        end
-//        else if(L16B == 'B11) begin //L16BF
-            
-//            // Load 16 bytes by concatenating 16 sequentially Addressable words: 
-//            // ReadData = concatenation {MEM[A], MEM[A+1], MEM[A+2], MEM[A+3]} 
-//            temp1 = {memory[Address[31:2]][7:0] , memory[(Address[31:2] + 1)][7:0], 
-//                      memory[(Address[31:2] + 2)][7:0], memory[(Address[31:2] + 3)][7:0]};
-                      
-//            temp2 = {memory[(Address[31:2] + 64)][7:0], memory[(Address[31:2] + 65)][7:0],
-//                     memory[(Address[31:2] + 66)][7:0], memory[(Address[31:2] + 67)][7:0]};
-                     
-//            temp3 = {memory[(Address[31:2] + 192)][7:0], memory[(Address[31:2] + 193)][7:0],
-//                     memory[(Address[31:2] + 194)][7:0], memory[(Address[31:2] + 195)][7:0]};
-                     
-//            temp4 = {memory[(Address[31:2] + 256)][7:0], memory[(Address[31:2] + 257)][7:0],
-//                     memory[(Address[31:2] + 258)][7:0], memory[(Address[31:2] + 259)][7:0]};
-//            ReadData2_1 = {temp1, temp2};  
-//            ReadData2_2 = {temp3, temp4};
-//         end  
+        end  
         else begin
             ReadData <= 32'd0;
             ReadData2 <= 0;

@@ -1,42 +1,51 @@
 .text
-vbsme:  	lui		$s7, 0x7fff				# 0	Set SAD to Largest Possible
-			ori		$s7, $s7, 0xffff		# 4
-			lw		$s0,  0($a0)			# 12 Frame Rows
-			lw		$s1,  4($a0)			# 16 Frame Cols
-			lw		$s2,  8($a0)			# 20 Window Rows
-			lw		$s3, 12($a0)			# 24 Window Cols
-			addi	$a1, $0, 16				# 28
-			mul		$a2, $s0, $s1,			# 32
-			sll		$a2, $a2, 2				# 36
-			add		$a2, $a1, $a2			# 40
-			sub		$s4, $s1, $s3			# 44 Max Frame Columns
-			sub		$s5, $s0, $s2			# 48 Max Frame Rows
-			addi	$t9, $0, 0				# 52 Current Row
-			addi	$t8, $0, 0				# 56 Current Column	
-			addi	$t0, $a1, 0				# 60 Current Frame Cell
-			addi	$s0, $a1,  0			# 64 Current Frame-Window Start
-			sll		$s6, $s3, 2				# 68 Move Frame-Window To Begining of Next Row
-SADLoop:	lw		$t3, 0($a2)			    # 72 L16B LOAD WINDOW ROW
-			lw		$t2, 0($t0)			    # 76 L16B LOAD FRAME ROW
-			slt		$t4, $t8, $s4			# 80 While We Stall...
-			slt		$t5, $t9, $s5			# 84 ...Check if We Are at...
-			or		$t4, $t4, $t5			# 88 ...the End of the Window
-			add 	$t5, $t2, $t3			# 92 AD16B
-CheckSAD:	beq		$t5, $s7, CheckExit		# 96 BGT
-			addi	$s7, $t5, 0				# 100 Set New Min SAD
-			addi	$v0, $t9, 0				# 104 Set New Min SAD Row
-			addi	$v1, $t8, 0				# 108 Set New Min SAD Col
-CheckExit:	bne		$t4, $0,  Move			# 112 Check if at Last (Possible) Row or Column
-			j		end						# 116
-Move:		beq		$t8, $s4, MoveNextR		# 120 Check if at Last (Possible) Column
-MoveRight:	addi	$t8, $t8, 1				# 124 Move Next Column Index
-			addi	$s0, $s0, 4				# 128 Move Frame-Window Start
-			addi	$t0, $s0, 0				# 132
-			j 		SADLoop					# 136
-MoveNextR:  addi	$t9, $t9, 1				# 140 Move Row +1
-			addi	$t8, $0,  0				# 144 Move Col 0
-			add		$s0, $s0, $s6			# 148
-			addi	$t0, $s0, 0				# 152
-			j		SADLoop					# 156 
-end:		j		endLoop					# 160
-endLoop:	j		end						# 164
+vbsme:  	li		$v0, 0					# 0 Set v0 = 0
+			li		$v1, 0					# 4 Set v1 = 0
+			lui		$s7, 0x7fff				# 8	Set SAD to Largest Possible
+			ori		$s7, $s7, 0xffff		# 12
+			lw		$s0,  0($a0)			# 16 Frame Rows
+			lw		$s1,  4($a0)			# 20 Frame Cols
+			lw		$s2,  8($a0)			# 24 Window Rows
+			lw		$s3, 12($a0)			# 28 Window Cols
+			addi	$a1, $0, 16				# 32
+			mul		$a2, $s0, $s1,			# 36
+			sll		$a2, $a2, 2				# 40
+			add		$a2, $a1, $a2			# 44
+			sub		$s4, $s1, $s3			# 80 Max Frame Columns
+			sub		$s5, $s0, $s2			# 84 Max Frame Rows
+			addi	$t9, $0, 0				# 88 Current Row
+			addi	$t8, $0, 0				# 92 Current Column	
+			addi	$t0, $a1, 0				# 96 Current Frame Cell
+			addi	$s0, $a1,  0			# 112 Current Frame-Window Start
+			sll		$s6, $s3, 2				# 256 Move Frame-Window To Begining of Next Row
+SADLoop:	li		$t5, 0					# 116 Reset Window SAD
+			addi	$t1, $a2, 0				# 120 Reset Window Address
+#COMPUTE SAD OF ENTIRE WINDOW	
+			lw		$t3, 0($t1)			    # L4B LOAD WINDOW ROW
+			lw		$t2, 0($t0)			    # L4B LOAD FRAME ROW
+			lw		$t6, 32($t1)			# L4B
+			lw		$t4, 512($t0)			# L4B
+			add 	$t7, $t2, $t3			# AD4B
+			add 	$t5, $t5, $t7			#
+			add 	$t7, $t4, $t6			# AD4B
+			add 	$t5, $t5, $t7			#
+CheckSAD:	beq		$t5, $s7, CheckExit		# BGT
+			addi	$s7, $t5, 0				# 208 Set New Min SAD
+			addi	$v0, $t9, 0				# 212 Set New Min SAD Row
+			addi	$v1, $t8, 0				# 216 Set New Min SAD Col
+CheckExit:	bne		$t8, $s4, Move			# 220 Check if at Last (Possible) Column
+			bne		$t9, $s5, Move			# 224 Check if at Last (Possible) Row
+			#jr		$ra						# 228
+			j		end	
+Move:		beq		$t8, $s4, MoveNextR		# 232 Check if at Last (Possible) Column
+MoveRight:	addi	$t8, $t8, 1				# 236 Move Next Column Index
+			addi	$s0, $s0, 4				# 240 Move Frame-Window Start
+			addi	$t0, $s0, 0				# 240
+			j 		SADLoop					# 244
+MoveNextR:  addi	$t9, $t9, 1				# 248 Move Row +1
+			addi	$t8, $0,  0				# 252 Move Col 0
+			add		$s0, $s0, $s6			# 260
+			addi	$t0, $s0, 0				# 264
+			j		SADLoop					# 268 
+end:		j		endLoop					# 272
+endLoop:	j		end						# 276

@@ -48,8 +48,8 @@ module DatapathController(
                     //CUSTOM INSTRUCTIONS
                     OP_110011 = 'b110011,   // L16BW - LOAD 16 BYTES
                     OP_111011 = 'b111011,   // L16BF - LOAD 16 BYTES
-                    OP_111110 = 'b111110;   // BLTE
-
+                    OP_111110 = 'b111110,   // BLTE
+                    OP_111111 = 'b111111;   // AD8B
                     
     reg [5:0] State = INITIAL;
     
@@ -260,6 +260,14 @@ module DatapathController(
                 MemToReg <= 2'b11; SignExt <= 1; AluOp <= 'b10000;
                 Jump <= 0; JumpMux <= 0; ByteSel <= 2'b00;
                 BCControl <= 'b110; BranchSourceMux <= 0; JAL <= 0; L16B <= 'b00;
+            end
+            OP_111111: begin
+                RegDest <= 2'b00; RegWrite <= 1; AluSrc <= 0; 
+                MemWrite <= 0; MemRead <= 0; Branch <= 0; 
+                MemToReg <= 2'b00; SignExt <= 1; AluOp <= 'b00000;
+                Jump <= 0; JumpMux <= 1; ByteSel <= 2'b00;
+                BCControl <= 'b000; BranchSourceMux <= 0; JAL <= 0; L16B <= 'b01;
+                
             end
         endcase
      end
