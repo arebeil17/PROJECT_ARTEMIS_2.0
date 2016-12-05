@@ -46,16 +46,17 @@ module DataMemory(Address, WriteData, ByteSel, L16B, Clock, MemWrite, MemRead, R
     input [1:0] ByteSel;    // 00 for Word, 01 for Byte, 11 for Half
     
     output reg [31:0] ReadData = 0; // Contents of memory location at Address
-    //output [127:0] ReadData2; // Contents of memory location at Address
-    output reg [63:0] ReadData2 = 0; // Contents of memory location at Address
-    //output reg [63:0] ReadData2_2 = 0; // Contents of memory location at Address
+    //reg [63:0] ReadData2_1; // Contents of memory location at Address
+    output reg [127:0] ReadData2 = 0; // Contents of memory location at Address
+    //reg [63:0] ReadData2_2 = 0; // Contents of memory location at Address
      
     reg [31:0] memory [0:5120]; // 256x32 Registers
     integer i = 0;
     reg [31:0] temp1 = 0, temp2 = 0, temp3 = 0, temp4 = 0;
-    
+    reg F = 0;
     //initialize data memory
-    initial begin
+   initial begin
+
         // Labs9-13DM.hex initializes all memory to 0x00000000
         //$readmemh("Labs9-13DM.hex", memory);
         // Labs14-15DM.hex Initializes Memory to 1,2,3,4,-1 and Remaining to 0
@@ -74,18 +75,6 @@ module DataMemory(Address, WriteData, ByteSel, L16B, Clock, MemWrite, MemRead, R
 //        for(i = 0; i < 5120; i = i + 1) begin
 //             memory[i] = 0;
 //         end
-//        memory[0] = 32'd100;
-//        memory[1] = 32'd200;
-//        memory[2] = 32'd300;
-//        memory[3] = 32'd400;
-//        memory[4] = 32'd500;
-//        memory[5] = 32'd600;
-//        memory[6] = 32'd700;
-//        memory[7] = 32'd800;
-//        memory[8] = 32'd900;
-//        memory[9] = 32'd1000;
-//        memory[10] = 32'd1100;
-//        memory[11] = 32'd1200;
     end
 
     always @(posedge Clock) begin
@@ -143,35 +132,38 @@ module DataMemory(Address, WriteData, ByteSel, L16B, Clock, MemWrite, MemRead, R
                     ReadData <= {{16{memory[Address[31:2]][15]}}, memory[Address[31:2]][31:16]}; 
             end
         end
-        else if(L16B == 'B10 || L16B == 'B11) begin //L16BW
+        else if(L16B == 'b10 || L16B == 'b11) begin //L16BW
                // Load 16 bytes by concatenating 16 sequentially Addressable words: 
-               // ReadData = concatenation {MEM[A], MEM[A+1], MEM[A+2], MEM[A+3]} 
-              temp1 = (!L16B[0]) ? {memory[Address[31:2]][7:0] , memory[(Address[31:2] + 1)][7:0], 
-                        memory[(Address[31:2] + 2)][7:0], memory[(Address[31:2] + 3)][7:0]}
-                       : {memory[Address[31:2]][7:0] , memory[(Address[31:2] + 1)][7:0], 
-                         memory[(Address[31:2] + 2)][7:0], memory[(Address[31:2] + 3)][7:0]}; 
-                        
-              temp2 = (!L16B[0]) ? {memory[(Address[31:2] + 4)][7:0], memory[(Address[31:2] + 5)][7:0],
-                       memory[(Address[31:2] + 6)][7:0], memory[(Address[31:2] + 7)][7:0]}
-                       : {memory[(Address[31:2] + 64)][7:0], memory[(Address[31:2] + 65)][7:0],
-                         memory[(Address[31:2] + 66)][7:0], memory[(Address[31:2] + 67)][7:0]};
+               // ReadData = concatenation {MEM[A], MEM[A+1], MEM[A+2], MEM[A+3] ...} 
+            F = L16B[0];
+            temp1 = {memory[Address[31:2]][7:0] , memory[(Address[31:2] + 1)][7:0], 
+                     memory[(Address[31:2] + 2)][7:0], memory[(Address[31:2] + 3)][7:0]}; 
+                                         
+            temp2 = {memory[(Address[31:2] + 4 + 60*F)][7:0], memory[(Address[31:2] + 5 + 60*F)][7:0],
+                     memory[(Address[31:2] + 6 + 60*F)][7:0], memory[(Address[31:2] + 7 + 60*F)][7:0]};
+           
+            temp3 = {memory[(Address[31:2] + 8 + 120*F)][7:0], memory[(Address[31:2] + 9 + 120*F)][7:0],
+                     memory[(Address[31:2] + 10 + 120*F)][7:0], memory[(Address[31:2] + 11 + 120*F)][7:0]};
+                                 
+            temp4 = {memory[(Address[31:2] + 12 + 180*F)][7:0], memory[(Address[31:2] + 13 + 180*F)][7:0],
+                     memory[(Address[31:2] + 14 + 180*F)][7:0], memory[(Address[31:2] + 15 + 180*F)][7:0]};
+                      
+            ReadData2 = {temp1, temp2, temp3, temp4};    
+//             temp1 = {memory[Address[31:2]][7:0] , memory[(Address[31:2] + 1)][7:0], 
+//                      memory[(Address[31:2] + 2)][7:0], memory[(Address[31:2] + 3)][7:0]}; 
+                                          
+//             temp2 = (!L16B[0]) ? {memory[(Address[31:2] + 4)][7:0], memory[(Address[31:2] + 5)][7:0],
+//                             memory[(Address[31:2] + 6)][7:0], memory[(Address[31:2] + 7)][7:0]}
+//                             : {memory[(Address[31:2] + 64)][7:0], memory[(Address[31:2] + 65)][7:0],
+//                               memory[(Address[31:2] + 66)][7:0], memory[(Address[31:2] + 67)][7:0]};
                        
-//              temp3 = (!L16B[0]) ? {memory[(Address[31:2] + 8)][7:0], memory[(Address[31:2] + 9)][7:0],
-//                       memory[(Address[31:2] + 10)][7:0], memory[(Address[31:2] + 11)][7:0]}
-//                      : {memory[(Address[31:2] + 192)][7:0], memory[(Address[31:2] + 193)][7:0],
-//                       memory[(Address[31:2] + 194)][7:0], memory[(Address[31:2] + 195)][7:0]};
-                       
-//              temp4 = (!L16B[0]) ? {memory[(Address[31:2] + 12)][7:0], memory[(Address[31:2] + 13)][7:0],
-//                       memory[(Address[31:2] + 14)][7:0], memory[(Address[31:2] + 15)][7:0]}
-//                      : {memory[(Address[31:2] + 256)][7:0], memory[(Address[31:2] + 257)][7:0],
-//                       memory[(Address[31:2] + 258)][7:0], memory[(Address[31:2] + 259)][7:0]};
-              ReadData2 = {temp1, temp2};  
-              //ReadData2_2 = {temp3, temp4};                 
+//             ReadData2_1 = {temp1, temp2};
         end  
         else begin
             ReadData <= 32'd0;
             ReadData2 <= 0;
         end
     end
+
 
 endmodule

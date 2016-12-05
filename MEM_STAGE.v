@@ -17,8 +17,6 @@ module MEM_STAGE(Clock, PC, WriteData, ReadData, WriteAddress, MemRead, MemWrite
     output [31:0] ReadData;
     output [127:0] WD3_128;
     
-    wire [63:0] RD2_64;
-    
     DataMemory DM(
         .Address(WriteAddress),
         .WriteData(WriteData),
@@ -28,8 +26,6 @@ module MEM_STAGE(Clock, PC, WriteData, ReadData, WriteAddress, MemRead, MemWrite
         .MemWrite(MemWrite),
         .MemRead(MemRead),
         .ReadData(ReadData),
-        .ReadData2(RD2_64));
-    
-    assign WD3_128 = RD2_64;    
-        
+        .ReadData2(WD3_128));
+            
 endmodule
