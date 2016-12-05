@@ -1,0 +1,15 @@
+.text
+main:
+		# Data Setups
+		addi	$t0,	$0,	2
+		addi	$t1,	$0,	3
+		addi	$t2,	$0,	4
+		addi	$t3,	$0,	5
+		addi	$t4,	$0,	1
+		
+		# Multiply Tests
+		mul	$s0,	$t0,	$t2	# s0 = 8
+		mult	$t0,	$t1		# Hi = 0, Lo = 6
+		multu	$t1,	$t2		# Hi = 0, Lo = 12
+		madd	$t2,	$t3		# Hi = 0, Lo = 32
+		msub	$t3,	$t4		# Hi = 0, Lo = 27

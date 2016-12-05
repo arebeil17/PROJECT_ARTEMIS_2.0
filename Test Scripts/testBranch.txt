@@ -1,0 +1,35 @@
+.text
+.main
+main:
+		addi	$t0,	$0,		5
+		addi	$t1,	$0,		4
+		addi	$t2,	$0,		9
+		addi	$t3,	$0,		-9
+		addi	$t4,	$0,		-9
+		addi	$s0,	$0,		0
+		addi	$s1,	$0,		0
+		addi	$s2,	$0,		0
+		addi	$s3,	$0,		0
+loop0:
+		beq		$s0,	$t0,	loop1
+		addi	$s0,	$s0,	1
+		j		loop0
+loop1:
+		bne		$s1,	$0, 	loop2
+		addi	$t1,	$t1,	-1
+		slt		$s1,	$t1,	$0
+		j		loop1
+loop2:
+		blez	$t2,	loop3
+		addi	$t2,	$t2,	-2
+		j		loop2
+loop3:
+		bgez	$t3,	loop4
+		addi	$t3,	$t1,	2
+		j		loop3
+loop4:
+		bgtz	$t4,	end
+		addi	$t4,	$t4, 	-2
+		j		end
+end:
+		j		main

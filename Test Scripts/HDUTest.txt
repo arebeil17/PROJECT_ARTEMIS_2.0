@@ -1,0 +1,16 @@
+.text
+.main
+loop:	addi	$t1,	$0,		1
+		sw		$t1, 	0($0)
+		lw		$t2,	0($0)
+		addi	$t3,	$t2,	1
+		sw		$t3,	4($0)
+		lw		$t4,	4($0)
+		addi	$t5,	$t4,	1
+		sw		$t5,	8($0)
+		lw		$t6,	8($0)
+		addi	$t7,	$t6,	1
+		sw		$t7,	12($0)
+		lw		$t8,	12($0)
+		addi	$t9,	$t8,	1
+		j	loop

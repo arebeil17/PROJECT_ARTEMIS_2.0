@@ -1,0 +1,11 @@
+.text
+main:
+		#BEQ and Jump Tests
+		addi    $t2,    $0,     1		# t2 = 1
+		addi    $t3,    $0,     5		# t3 = 5
+loop:		
+		addi 	$t1,	$t1,    1		# t1 = t1 + 1
+		slt     $t0,    $t1,   $t3       # if(t1 < 5) t0 = 1
+		beq     $t0,    $t2,  loop      # if(t0 = t2) loop
+		add    $t1,    $zero,  $zero       # reset t1 = 0
+		j       loop
