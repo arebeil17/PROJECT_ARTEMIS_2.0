@@ -51,25 +51,27 @@
 module RegisterFile(
     Clk, Reset,
     // Control Input(s)
-    RegWrite, JAL,
+    RegWrite, JAL, L16B,
     // Data Input(s)
-    ReadRegister1, ReadRegister2, WriteRegister1, WriteRegister2, 
+    ReadRegister1, ReadRegister2, WriteRegister1, WriteRegister2, WriteData1, WriteData2, WD3_128, 
     // Control Output(s)
     // Data Output(s)
-    WriteData1, WriteData2,  ReadData1, ReadData2, V0, V1);
+     ReadData1, ReadData2, V0, V1, RD1_128, RD2_128);
     
     input [4:0] ReadRegister1, ReadRegister2, WriteRegister1, WriteRegister2;
     input [31:0] WriteData1, WriteData2;
-    input RegWrite, Reset, JAL;
+    input [127:0] WD3_128;
+    input RegWrite, Reset, JAL, L16B;
     input Clk;
     
-    output reg [31:0] ReadData1, ReadData2;
+    output reg [31:0] ReadData1, ReadData2; 
+    output reg [127:0] RD1_128, RD2_128;
     (* mark_debug = "true"*) output [31:0] V0, V1;
     reg [31:0] S1, S2, S3, S4, S7;
     
     reg [63:0]  Window_SAD_Cnt = 0; //Tracks number of window iterations to compute all SADs
     
-    reg [31:0] registers [0:31];
+    reg [63:0] registers [0:31];
     
     initial begin
 	   registers[0] =  32'd0;
@@ -108,56 +110,63 @@ module RegisterFile(
 
     always @(negedge Clk, posedge Reset) begin
         if(Reset)begin
-            registers[0] =  32'd0;
-            registers[1] =  32'd0;
-            registers[2] =  32'd0;
-            registers[3] =  32'd0;
-            registers[4] =  32'd0;
-            registers[5] =  32'd0;
-            registers[6] =  32'd0;
-            registers[7] =  32'd0;
-            registers[8] =  32'd0;
-            registers[9] =  32'd0;
-            registers[10] = 32'd0;
-            registers[11] = 32'd0;
-            registers[12] = 32'd0;
-            registers[13] = 32'd0;
-            registers[14] = 32'd0;
-            registers[15] = 32'd0;
-            registers[16] = 32'd0;
-            registers[17] = 32'd0;
-            registers[18] = 32'd0;
-            registers[19] = 32'd0;
-            registers[20] = 32'd0;
-            registers[21] = 32'd0;
-            registers[22] = 32'd0;
-            registers[23] = 32'd0;
-            registers[24] = 32'd0;
-            registers[25] = 32'd0;
-            registers[26] = 32'd0;
-            registers[27] = 32'd0;
-            registers[28] = 32'd0;
-            registers[29] = 32'd0;
-            registers[30] = 32'd0;
-            registers[31] = 32'd0;
+            registers[0] =  128'd0;
+            registers[1] =  128'd0;
+            registers[2] =  128'd0;
+            registers[3] =  128'd0;
+            registers[4] =  128'd0;
+            registers[5] =  128'd0;
+            registers[6] =  128'd0;
+            registers[7] =  128'd0;
+            registers[8] =  128'd0;
+            registers[9] =  128'd0;
+            registers[10] = 128'd0;
+            registers[11] = 128'd0;
+            registers[12] = 128'd0;
+            registers[13] = 128'd0;
+            registers[14] = 128'd0;
+            registers[15] = 128'd0;
+            registers[16] = 128'd0;
+            registers[17] = 128'd0;
+            registers[18] = 128'd0;
+            registers[19] = 128'd0;
+            registers[20] = 128'd0;
+            registers[21] = 128'd0;
+            registers[22] = 128'd0;
+            registers[23] = 128'd0;
+            registers[24] = 128'd0;
+            registers[25] = 128'd0;
+            registers[26] = 128'd0;
+            registers[27] = 128'd0;
+            registers[28] = 128'd0;
+            registers[29] = 128'd0;
+            registers[30] = 128'd0;
+            registers[31] = 128'd0;
             ReadData1 <= 32'b0;
             ReadData2 <= 32'b0;
         end else begin
-            if(RegWrite)registers[WriteRegister1] = WriteData1;
-                ReadData1 = registers[ReadRegister1];
-                ReadData2 = registers[ReadRegister2];
+            if(RegWrite && !L16B) begin
+                registers[WriteRegister1] = WriteData1;
+            end 
+            else if(RegWrite && L16B) begin
+                registers[WriteRegister1] = WD3_128;
+            end
             if(JAL) begin
                 registers[WriteRegister2] = WriteData2;
             end
+            ReadData1 = registers[ReadRegister1][31:0];
+            ReadData2 = registers[ReadRegister2][31:0];
+            RD1_128   = registers[ReadRegister1];
+            RD2_128   = registers[ReadRegister2];
         end
     end
     
     always @(*) begin
-        S1 <= registers[17];
-        S2 <= registers[18];
-        S3 <= registers[19];
-        S4 <= registers[20];
-        S7 <= registers[23];
+        S1 <= registers[17][31:0];
+        S2 <= registers[18][31:0];
+        S3 <= registers[19][31:0];
+        S4 <= registers[20][31:0];
+        S7 <= registers[23][31:0];
     end
     //Track $t5, every change is a window scan iteration
     always @(posedge Clk) begin
@@ -165,7 +174,7 @@ module RegisterFile(
             Window_SAD_Cnt = Window_SAD_Cnt + 1;
     end
     
-    assign V0 = registers[2];
-    assign V1 = registers[3];
+    assign V0 = registers[2][31:0];
+    assign V1 = registers[3][31:0];
     
 endmodule

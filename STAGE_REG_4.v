@@ -23,23 +23,25 @@
 module MEMWB_Reg(
     Clock, Reset,
     // Control Input(s)
-    MemToReg_In, RegDest_In, RegWrite_In,
+    MemToReg_In, RegDest_In, RegWrite_In, L16B_In,
     // Data Input(s)
-    ALUResult_In, PC_In, ReadData_In,  
+    ALUResult_In, PC_In, ReadData_In, WD3_128_In,  
     // Control Output(s)
-    MemToReg_Out, RegDest_Out, RegWrite_Out,
+    MemToReg_Out, RegDest_Out, RegWrite_Out, L16B_Out,
     // Data Output(s)
-    ALUResult_Out, PC_Out, ReadData_Out);
+    ALUResult_Out, PC_Out, ReadData_Out, WD3_128_Out);
     
-    input Clock, Reset, RegWrite_In;
+    input Clock, Reset, RegWrite_In, L16B_In;
     input [1:0] MemToReg_In;
     input [4:0] RegDest_In;
     input [31:0] ALUResult_In, PC_In, ReadData_In;
+    input [127:0] WD3_128_In;
     
-    output reg RegWrite_Out;
+    output reg RegWrite_Out, L16B_Out;
     output reg [1:0] MemToReg_Out;
     output reg [4:0] RegDest_Out;
     output reg [31:0] ALUResult_Out, ReadData_Out;
+    output reg [127:0] WD3_128_Out;
     (* mark_debus = "true"*) output reg [31:0] PC_Out;
     
     initial begin
@@ -49,6 +51,8 @@ module MEMWB_Reg(
         ReadData_Out <= 32'b0;
         RegDest_Out <= 5'b0;
         RegWrite_Out <= 0;
+        L16B_Out <= 0;
+        WD3_128_Out <= 0;
     end
     
     always @(posedge Clock) begin
@@ -59,6 +63,8 @@ module MEMWB_Reg(
             ReadData_Out        <= 0;
             RegDest_Out         <= 0;
             RegWrite_Out        <= 0;
+            L16B_Out            <= 0;
+            WD3_128_Out         <= 0;
         end else begin
             ALUResult_Out       <= ALUResult_In;
             MemToReg_Out        <= MemToReg_In;
@@ -66,6 +72,8 @@ module MEMWB_Reg(
             ReadData_Out        <= ReadData_In;
             RegDest_Out         <= RegDest_In;
             RegWrite_Out        <= RegWrite_In;
+            L16B_Out            <= L16B_In;
+            WD3_128_Out         <= WD3_128_In;
         end
     end
 endmodule

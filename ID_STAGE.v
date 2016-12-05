@@ -10,26 +10,30 @@
 module ID_STAGE(
     Clock, Reset,
     // Control Input(s)
-    RegWrite_In, MemReadFromEXMEM, MemReadFromIDEX, FWMuxAControl, FWMuxBControl, RegWriteFromIDEX, IFID_JFlush,
+    RegWrite_In, MemReadFromEXMEM, MemReadFromIDEX, FWMuxAControl, FWMuxBControl, RegWriteFromIDEX, IFID_JFlush, L16B_In,
     // Data Input(s)
-    MEM_Instruction_In, EX_Instruction_In, Instruction, PC, WriteAddress, WriteData, FWFromMEM, FWFromWB,  
+    MEM_Instruction_In, EX_Instruction_In, Instruction, PC, WriteAddress, WriteData, FWFromMEM, FWFromWB, WD3_128,  
     // Control Output(s)
-    IDEXFlush, ALUOp, RegWrite, ALUSrc, MemWrite, MemRead, Branch_Out, MemToReg, ByteSel, RegDestMuxControl, Jump, PC_WriteEnable, IFIDWriteEnable_Out, IFIDFlush, LB4,
+    IDEXFlush, ALUOp, RegWrite, ALUSrc, MemWrite, MemRead, Branch_Out, MemToReg, ByteSel, RegDestMuxControl, Jump, PC_WriteEnable,
+     IFIDWriteEnable_Out, IFIDFlush, L16B_Out,
     // Data Output(s)
-    SE_Out, RF_RD1, RF_RD2, BranchDest, JumpDest, V0_Out, V1_Out);
+    SE_Out, RF_RD1, RF_RD2, BranchDest, JumpDest, V0_Out, V1_Out, RD1_128, RD2_128);
 
-    input Clock, Reset, RegWrite_In, MemReadFromIDEX, RegWriteFromIDEX, MemReadFromEXMEM, IFID_JFlush;
+    input Clock, Reset, RegWrite_In, MemReadFromIDEX, RegWriteFromIDEX, MemReadFromEXMEM, IFID_JFlush, L16B_In;
     input [1:0] FWMuxAControl, FWMuxBControl;
     input [4:0] WriteAddress;
     input [31:0] Instruction, MEM_Instruction_In, EX_Instruction_In, WriteData, PC, FWFromMEM, FWFromWB;
+    input [127:0] WD3_128;
     //Output wires
     output wire [31:0] SE_Out, RF_RD1, RF_RD2, BranchDest, V0_Out, V1_Out;
          
     //Control Signal Outputs
-    output IDEXFlush, RegWrite, ALUSrc, MemWrite, MemRead, Branch_Out, Jump, PC_WriteEnable, IFIDWriteEnable_Out, IFIDFlush, LB4;
+    output IDEXFlush, RegWrite, ALUSrc, MemWrite, MemRead, Branch_Out, Jump, PC_WriteEnable, IFIDWriteEnable_Out, IFIDFlush; 
+    output [1:0] L16B_Out;
     output [1:0] ByteSel, RegDestMuxControl, MemToReg;      
     output [4:0] ALUOp;
     output [31:0] JumpDest;
+    output [127:0] RD1_128, RD2_128;
     
     wire SignExt, LoadMuxControl, Control_WriteEnableMux, Controller_Branch_Out, Controller_Jump_Out, JumpMuxSel, BC_Out, BranchSourceMuxControl, JAL;
     wire [2:0] BCControl;
@@ -129,20 +133,24 @@ module ID_STAGE(
         .BCControl(BCControl),
         .BranchSourceMux(BranchSourceMuxControl),
         .JAL(JAL),
-        .LB4(LB4));
+        .L16B(L16B_Out));
         
      RegisterFile RF(
         .ReadRegister1(Instruction[25:21]),
         .ReadRegister2(Instruction[20:16]),
         .WriteRegister1(WriteAddress),
         .WriteRegister2(5'd31),
+        .WD3_128(WD3_128),
         .WriteData1(WriteData),
         .WriteData2(PC+4),
         .RegWrite(RegWrite_In),
         .JAL(JAL),
+        .L16B(L16B_In),
         .Clk(Clock),
         .ReadData1(RF_RD1),
         .ReadData2(RF_RD2),
+        .RD1_128(RD1_128),
+        .RD2_128(RD2_128),
         .Reset(Reset),
         .V0(V0_Out), 
         .V1(V1_Out));

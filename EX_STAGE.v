@@ -11,22 +11,24 @@
 module EX_STAGE(
     Clock, Reset, 
     // Control Input(s)
-    ALUSrc, RegDestMuxControl, ALUOp, RegWrite_In, FWMuxAControl, FWMuxBControl,
+    ALUSrc, RegDestMuxControl, ALUOp, RegWrite_In, FWMuxAControl, FWMuxBControl, L16B,
     // Data Input(s)
-    PC, Instruction, RF_RD1, RF_RD2, SE_In, FWFromMEM, FWFromWB, MEM_ReadData,
+    PC, Instruction, RF_RD1, RF_RD2, SE_In, FWFromMEM, FWFromWB, MEM_ReadData, RD1_128, RD2_128,
     // Control Output(s)
     RegDest, RegWrite_Out,
     // Data Output(s)
-    ALUResult, FWMuxB_Out);
+    Result, FWMuxB_Out);
     
     input Clock, Reset, ALUSrc, RegWrite_In;
-    input [1:0] RegDestMuxControl, FWMuxAControl, FWMuxBControl;
+    input [1:0] RegDestMuxControl, FWMuxAControl, FWMuxBControl, L16B;
     input [4:0] ALUOp;
     input [31:0] PC, Instruction, RF_RD1, RF_RD2, SE_In, FWFromMEM, FWFromWB, MEM_ReadData;
+    input [127:0] RD1_128, RD2_128;
     
     output RegWrite_Out;
     output [4:0] RegDest;
-    output [31:0] ALUResult;
+    output [31:0] Result;
+    wire [31:0] ALUResult, SADResult;
     output wire [31:0] FWMuxB_Out;
     
     wire [63:0] HiLoWrite, HiLoRead;
@@ -88,5 +90,18 @@ module EX_STAGE(
         .Out(RegDest),
         .Sel(RegDestMuxControl));
     
+    SAD_UNIT SadUnit(
+        .A(RD1_128), 
+        .B(RD2_128), 
+        .SAD(SADResult));
+    
+    
+    Mux32Bit2To1 ResultMux( 
+        .Out(Result), 
+        .In0(ALUResult), 
+        .In1(SADResult), 
+        .Sel(L16B[1]));
+    
     assign RegWrite_Out = RegWrite_In & ALURegWrite;
+    
 endmodule
